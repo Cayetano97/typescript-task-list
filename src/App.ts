@@ -18,7 +18,7 @@ export class App {
     this.close  = this.alert?.firstElementChild as HTMLElement; 
     this.input = document.querySelector("input") as HTMLInputElement;
     this.arrow = document.querySelector(".arrow");
-    this.table = document.querySelector("tbody"); //this.table tiene un error por
+    this.table = document.querySelector("tbody");
   }
 
   init = async () => {
@@ -51,10 +51,10 @@ export class App {
     this.renderTasks(tasks as unknown as Task[]);
   };
   // //prepara una plantilla HTML, y la actualiza con contenido dinámico
-  generateRow = (id: string, title: string, done: boolean) => {
+  generateRow = (id: string, title: string, isDone: boolean) => {
     let newRow = document.createElement("tr");
     newRow.setAttribute("id", id);
-    title = done ? `<del>${title}</del>` : title;
+    title = isDone ? `<del>${title}</del>` : title;
     newRow.innerHTML = `
 <td>
   <i class="fa-solid fa-circle-check"></i>
@@ -113,20 +113,16 @@ export class App {
   // //Tachado de tarea
   crossOut = (event: MouseEvent) => {
     let task = (event.target as HTMLElement)?.nextElementSibling as HTMLElement;
-        let text = task.innerHTML;
-        if (text.includes("<del>")) {
-          text = task.firstElementChild?.textContent ?? "";
-          task.innerHTML = text;
-          task.closest('.task-container')?.setAttribute("data-completed", "false");
-        } else {
-          task.innerHTML = `<del>${text}</del>`;
-          (task.parentNode?.parentNode as HTMLElement)?.setAttribute("data-completed", "true");
-        }
-      };
+    let text = task.innerHTML;
+    text = text.includes("<del>") ? task.firstElementChild?.textContent ?? "" : `<del>${text}</del>`;
+    task.innerHTML = text;
+    task.closest('.task-container')?.setAttribute("data-completed", text.includes("<del>") ? "true" : "false");
+  };
+  
 
   //Añadir nueva tarea
   addTask = (input: HTMLInputElement, idGenerator: () => string, text: string, alert: HTMLElement): void => {
-    if (input.value.trim() === "") {
+    if (!text) {
       input.value = "";
       alert.classList.remove("dismissible");
     } else {
@@ -168,10 +164,10 @@ export class App {
   // Eliminación de tarea
    removeRow = (e: Event, editionMode: boolean): void => {
      if (editionMode) {
-       (((e.target as HTMLElement).parentNode as HTMLElement).parentNode as HTMLElement).remove();
-     } else {
+      (e.currentTarget as HTMLElement).closest("tr")?.remove();
+    } else {
        // console.log(e.target.parentNode.parentNode.parentNode);
-       ((((e.target as HTMLElement).parentNode as HTMLElement).parentNode as HTMLElement).parentNode as HTMLElement).remove();
+       (((e.target as HTMLElement).parentNode as HTMLElement).parentNode as HTMLElement).remove();
       }
    };
 
